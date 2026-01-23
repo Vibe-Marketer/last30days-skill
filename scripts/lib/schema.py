@@ -180,6 +180,76 @@ class Report:
             d['x_error'] = self.x_error
         return d
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "Report":
+        """Create Report from serialized dict (handles cache format)."""
+        # Handle range field conversion
+        range_data = data.get('range', {})
+        range_from = range_data.get('from', data.get('range_from', ''))
+        range_to = range_data.get('to', data.get('range_to', ''))
+
+        # Reconstruct Reddit items
+        reddit_items = []
+        for r in data.get('reddit', []):
+            eng = None
+            if r.get('engagement'):
+                eng = Engagement(**r['engagement'])
+            comments = [Comment(**c) for c in r.get('top_comments', [])]
+            subs = SubScores(**r.get('subs', {})) if r.get('subs') else SubScores()
+            reddit_items.append(RedditItem(
+                id=r['id'],
+                title=r['title'],
+                url=r['url'],
+                subreddit=r['subreddit'],
+                date=r.get('date'),
+                date_confidence=r.get('date_confidence', 'low'),
+                engagement=eng,
+                top_comments=comments,
+                comment_insights=r.get('comment_insights', []),
+                relevance=r.get('relevance', 0.5),
+                why_relevant=r.get('why_relevant', ''),
+                subs=subs,
+                score=r.get('score', 0),
+            ))
+
+        # Reconstruct X items
+        x_items = []
+        for x in data.get('x', []):
+            eng = None
+            if x.get('engagement'):
+                eng = Engagement(**x['engagement'])
+            subs = SubScores(**x.get('subs', {})) if x.get('subs') else SubScores()
+            x_items.append(XItem(
+                id=x['id'],
+                text=x['text'],
+                url=x['url'],
+                author_handle=x['author_handle'],
+                date=x.get('date'),
+                date_confidence=x.get('date_confidence', 'low'),
+                engagement=eng,
+                relevance=x.get('relevance', 0.5),
+                why_relevant=x.get('why_relevant', ''),
+                subs=subs,
+                score=x.get('score', 0),
+            ))
+
+        return cls(
+            topic=data['topic'],
+            range_from=range_from,
+            range_to=range_to,
+            generated_at=data['generated_at'],
+            mode=data['mode'],
+            openai_model_used=data.get('openai_model_used'),
+            xai_model_used=data.get('xai_model_used'),
+            reddit=reddit_items,
+            x=x_items,
+            best_practices=data.get('best_practices', []),
+            prompt_pack=data.get('prompt_pack', []),
+            context_snippet_md=data.get('context_snippet_md', ''),
+            reddit_error=data.get('reddit_error'),
+            x_error=data.get('x_error'),
+        )
+
 
 def create_report(
     topic: str,

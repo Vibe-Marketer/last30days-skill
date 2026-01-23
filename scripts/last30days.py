@@ -211,7 +211,7 @@ def main():
         cached = cache.load_cache(cache_key)
         if cached:
             # Use cached data
-            report = schema.Report(**cached)
+            report = schema.Report.from_dict(cached)
             output_result(report, args.emit)
             return
 
