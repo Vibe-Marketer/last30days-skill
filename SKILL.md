@@ -76,23 +76,25 @@ echo "Please edit it to add your API keys, then run the skill again."
 
 ## Research Execution
 
-**Display this to the user immediately:**
+**IMPORTANT: Run WebSearch FIRST, then the script.** This way users see our nice progress display as the "working state" while the slower script runs.
+
+**Step 1: Kick off WebSearch** (runs quickly)
+- Search for: `{TOPIC} 2026` (or current year) - find 8-15 pages
+- Search for: `{TOPIC} best practices tutorial guide` - find 5-10 more
+- EXCLUDE reddit.com, x.com, twitter.com (covered by script)
+- INCLUDE: blogs, tutorials, docs, news, GitHub repos
+
+**Step 2: Run the research script** (takes longer, shows progress)
+```bash
+python3 ~/.claude/skills/last30days/scripts/last30days.py "$ARGUMENTS" --emit=compact 2>&1
+```
+
+The script displays this progress while running:
 ```
 🚀 Deploying research agents...
 ├─ 🟠 Reddit Agent: Scanning subreddits for discussions...
 └─ 🔵 X Agent: Following the conversation on X...
 ```
-
-**Run the research script:**
-```bash
-python3 ~/.claude/skills/last30days/scripts/last30days.py "$ARGUMENTS" --emit=compact 2>&1
-```
-
-**Then run WebSearch** (these will show as visible tool calls):
-- Search for: `{TOPIC} 2026` (or current year) - find 8-15 pages
-- Search for: `{TOPIC} best practices tutorial guide` - find 5-10 more
-- EXCLUDE reddit.com, x.com, twitter.com (already covered)
-- INCLUDE: blogs, tutorials, docs, news, GitHub repos
 
 **Depth options** (passed through from user's command):
 - `--quick` → Faster, fewer sources (8-12 each)
